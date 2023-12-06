@@ -1,0 +1,58 @@
+#include <stdio.h>
+#include "pico/stdlib.h"
+#include "hardware/spi.h"
+
+// Define SPI instance and GPIOs for SCK, MOSI, MISO, and CS
+#define SPI_PORT spi0
+#define GPIO_SCK 18
+#define GPIO_MOSI 19
+#define GPIO_MISO 16
+#define GPIO_CS 17
+
+void adc124s051_init() {
+    // Initialize SPI
+    spi_init(SPI_PORT, 1000000); // 1 MHz SPI clock
+    gpio_set_function(GPIO_SCK, GPIO_FUNC_SPI);
+    gpio_set_function(GPIO_MOSI, GPIO_FUNC_SPI);
+    gpio_set_function(GPIO_MISO, GPIO_FUNC_SPI);
+
+    // Initialize CS pin
+    gpio_init(GPIO_CS);
+    gpio_set_dir(GPIO_CS, GPIO_OUT);
+    gpio_put(GPIO_CS, 1); // Set CS high
+}
+
+uint16_t adc124s051_read(uint8_t channel) {
+    uint8_t tx_buffer[2] = {0};
+    uint8_t rx_buffer[2] = {0};
+
+    // Prepare command to select channel
+    tx_buffer[0] = (channel & 0x03) << 6;
+
+    // Select ADC chip
+    gpio_put(GPIO_CS, 0);
+
+    // Transmit and receive data
+    spi_write_read_blocking(SPI_PORT, tx_buffer, rx_buffer, 2);
+
+    // Deselect ADC chip
+    gpio_put(GPIO_CS, 1);
+
+    // Convert received data to 12-bit ADC value
+    uint16_t result = ((rx_buffer[0] & 0x0F) << 8) | rx_buffer[1];
+    return result;
+}
+
+int main() {
+    stdio_init_all();
+    adc124s051_init();
+
+    while (1) {
+      for (int i = 0 ; i <4; i++){
+        uint16_t adc_value = adc124s051_read(i); // Read from channel i
+	adc_value = adc124s051_read(i); // Read from channel i
+        printf("ADC %d: %d\n", i,adc_value);
+        sleep_ms(1000);
+      }
+    }
+}
