@@ -30,7 +30,7 @@ int main() {
     // Initialize the control pin as output and set it to low
     gpio_init(CONTROL_PIN);
     gpio_set_dir(CONTROL_PIN, GPIO_OUT);
-    gpio_put(CONTROL_PIN, 0);
+    gpio_put(CONTROL_PIN, 1);
 
     // Create an instance of ADC124S051 struct
     ADC124S051 adc;
@@ -53,8 +53,15 @@ int main() {
       }
 
       for (int i = 0 ; i <4; i++){
-        float adc_value = adc124s051_read(&adc, 0); // Read from channel 0
-        adc_value = adc124s051_read(&adc, 0); // Read from channel 0	
+        float adc_value = adc124s051_read(&adc, i); // Read from channel 0
+        adc_value = adc124s051_read(&adc, i); // Read from channel 0
+	if (i==0 || i == 1){
+	  adc_value = adc_value/(0.01*50);
+	  
+	}
+
+	if (i==2) adc_value = adc_value*2.;
+	    
         printf("ADC %d: %.2f\n", i,adc_value);
         sleep_ms(1000);
       }

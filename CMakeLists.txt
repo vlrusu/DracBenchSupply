@@ -4,7 +4,7 @@ set(NAME DracBenchSupply)
 set(PICO_SDK_PATH "/home/mu2e/pico/pico-sdk")
 include(pico_sdk_import.cmake)
 
-project(AMBTester C CXX ASM)
+project(DracBenchSupply C CXX ASM)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
@@ -39,8 +39,8 @@ target_link_libraries(${PROJECT_NAME} pico_stdlib hardware_adc hardware_pio hard
 
 pico_add_extra_outputs(${PROJECT_NAME})
 
-pico_enable_stdio_uart(AMBTester 0)
-pico_enable_stdio_usb(AMBTester 1)
+pico_enable_stdio_uart(DracBenchSupply 0)
+pico_enable_stdio_usb(DracBenchSupply 1)
 
 
 install(FILES
