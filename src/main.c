@@ -4,9 +4,9 @@
  * Author: Vadim Rusu
  * Description: 
  * Created: Wed Dec 27 14:04:26 2023 (-0600)
- * Last-Updated: Thu Dec 28 09:57:42 2023 (-0600)
+ * Last-Updated: Thu Dec 28 10:11:27 2023 (-0600)
  *           By: Vadim Rusu
- *     Update #: 8
+ *     Update #: 12
  */
 
 /* Change Log:
@@ -118,6 +118,7 @@ float get_temp(){
   adc_select_input(2);
   adc_read();
   uint16_t raw = adc_read();
+
   float voltage = (raw * PICO_ADC_VREF) / PICO_ADC_RESOLUTION;
   float temp = (1.8455 - voltage)/0.01123;
   return temp;
@@ -217,8 +218,8 @@ int main() {
 	char v5string[20];
 	char v25string[20];
 
-	sprintf(v5string, "%.2xV %.2xA", v5,i5);
-	sprintf(v25string, "%.2xV %.2xA", v25,i25);
+	sprintf(v5string, "%.2fV %.2fA", v5,i5);
+	sprintf(v25string, "%.2fV %.2fA", v25,i25);
 	Paint_ClearWindows(1, TOPCOLORWINDOW, LCD_1IN14.WIDTH, LCD_1IN14.HEIGHT, GREEN);
 	Paint_DrawString_EN(1, textpos, v5string, &Font20, 0x000f, 0xfff0);
 	textpos+=20;
@@ -229,7 +230,7 @@ int main() {
 
       else{
 	char tstring[20];
-	sprintf(tstring, "%.2xC %.2xC", t25,temp);
+	sprintf(tstring, "%.2fC %.2fC", t25,temp);
 	Paint_ClearWindows(1, TOPCOLORWINDOW, LCD_1IN14.WIDTH, LCD_1IN14.HEIGHT, GREEN);
 	Paint_DrawString_EN(1, textpos, tstring, &Font20, 0x000f, 0xfff0);
 	LCD_1IN14_Display(BlackImage);
@@ -250,24 +251,24 @@ int main() {
 	gpio_put(CONTROL_PIN, 0);
       }
     else if (input == POWERUP) {
-      printf("Turning on\n");
+      printf("Turning on pin %d\n",CONTROL_PIN);
       gpio_put(CONTROL_PIN, 1);
     }
 
     else if (input == GETDEVICEID)
       {
-	printf("%.2x\n", DEVICEID);
+	printf("%.2f\n", DEVICEID);
       }
 
     else if (input == GETDATA)
       {
 	char* names[]={"I5.0","I2.5","V5.0","V2.5"};
-	printf("I5.0=%.2x\n",i5);
-	printf("I2.5=%.2x\n",i25);
-	printf("V5.0=%.2x\n",v5);
-	printf("V2.5=%.2x\n",v25);
-	printf("Temp2.5=%.2x\n",t25);
-	printf("Temp=%.2x\n",temp);			
+	printf("I5.0=%.2f\n",i5);
+	printf("I2.5=%.2f\n",i25);
+	printf("V5.0=%.2f\n",v5);
+	printf("V2.5=%.2f\n",v25);
+	printf("Temp2.5=%.2f\n",t25);
+	printf("Temp=%.2f\n",temp);			
 
 
       }
