@@ -4,9 +4,9 @@
  * Author: Vadim Rusu
  * Description: 
  * Created: Wed Dec 27 14:04:26 2023 (-0600)
- * Last-Updated: Thu Dec 28 10:11:27 2023 (-0600)
+ * Last-Updated: Thu Dec 28 12:19:35 2023 (-0600)
  *           By: Vadim Rusu
- *     Update #: 12
+ *     Update #: 37
  */
 
 /* Change Log:
@@ -65,18 +65,24 @@
 #define POWEROFF 'O'
 #define GETDATA 'A'
 
-#define DEVICEID 0xB2
+#define DEVICEID 0xB0
 
-#define MAXTEMP 50
+#define MAXTEMP 45
 
 UWORD *BlackImage;
-#define TOPCOLORWINDOW 50
-#define STARTTEXTPOS 60
+#define TOPCOLORWINDOW 0
+#define STARTTEXTPOS 40
 
 // Create an instance of ADC124S051 struct
 ADC124S051 adc;
 
 int voltagesetup;
+
+
+// Function to apply low pass filter
+float lowPassFilter(float input, float previousOutput, float alpha) {
+    return alpha * input + (1 - alpha) * previousOutput;
+}
 
 float get_v5(){
 
@@ -196,7 +202,10 @@ int main() {
 
 
   float v5,v25,i5,i25,t25,temp;
+  float v5l=0,v25l=0,i5l=0,i25l=0,t25l=0,templ = 0;
   int temp_alarm;
+  int temp_alarm_set = 0;
+  float alpha = 0.1;  // Filter constant (between 0 and 1)
   
   while (1) {
 
@@ -208,22 +217,40 @@ int main() {
     t25=get_temp25();
     temp=get_temp();
 
+
+    
+
+    // Apply the low pass filter
+    v5l = lowPassFilter(v5, v5l, alpha);
+    v25l = lowPassFilter(v25, v25l, alpha);
+    i5l = lowPassFilter(i5, i5l, alpha);
+    i25l = lowPassFilter(i25, i25l, alpha);
+
+    t25l = lowPassFilter(t25, t25l, alpha);
+    templ = lowPassFilter(temp, templ, alpha);    
+
+
     int textpos = STARTTEXTPOS;
 
-    temp_alarm = (temp>MAXTEMP || t25>MAXTEMP)?1:0;
+    temp_alarm = (templ>MAXTEMP || t25l>MAXTEMP)?1:0;
 				       
     
-    if (temp_alarm == 0){
+    if (temp_alarm == 0 && temp_alarm_set == 0){
       if (voltagesetup){
 	char v5string[20];
 	char v25string[20];
 
-	sprintf(v5string, "%.2fV %.2fA", v5,i5);
-	sprintf(v25string, "%.2fV %.2fA", v25,i25);
+	sprintf(v5string, "%.2fV %.2fA", v5l,i5l);
+	sprintf(v25string, "%.2fV %.2fA", v25l,i25l);
 	Paint_ClearWindows(1, TOPCOLORWINDOW, LCD_1IN14.WIDTH, LCD_1IN14.HEIGHT, GREEN);
-	Paint_DrawString_EN(1, textpos, v5string, &Font20, 0x000f, 0xfff0);
-	textpos+=20;
-	Paint_DrawString_EN(1, textpos, v25string, &Font20, 0x000f, 0xfff0);
+	Paint_DrawString_EN(1, textpos, v5string, &Font24, 0x000f, 0xfff0);
+	textpos+=30;
+	Paint_DrawString_EN(1, textpos, v25string, &Font24, 0x000f, 0xfff0);
+	char tstring[20];
+	textpos+=30;
+	sprintf(tstring, "%.1fC Tb=%.1fC", t25l,templ);
+	Paint_DrawString_EN(1, textpos, tstring, &Font24, 0x000f, 0xfff0);
+
 
 	LCD_1IN14_Display(BlackImage);
       }
@@ -232,15 +259,19 @@ int main() {
 	char tstring[20];
 	sprintf(tstring, "%.2fC %.2fC", t25,temp);
 	Paint_ClearWindows(1, TOPCOLORWINDOW, LCD_1IN14.WIDTH, LCD_1IN14.HEIGHT, GREEN);
-	Paint_DrawString_EN(1, textpos, tstring, &Font20, 0x000f, 0xfff0);
+	Paint_DrawString_EN(1, textpos, tstring, &Font24, 0x000f, 0xfff0);
 	LCD_1IN14_Display(BlackImage);
-      }	
+      }
     }
 
     else{
+      temp_alarm_set = 1;
       gpio_put(CONTROL_PIN, 0); //turn power off
       Paint_ClearWindows(1, TOPCOLORWINDOW, LCD_1IN14.WIDTH, LCD_1IN14.HEIGHT, RED);
-      Paint_DrawString_EN(1, textpos, "Temp Alarm, Fan fail", &Font20, 0x000f, 0xfff0);
+      Paint_DrawString_EN(1, textpos, "Temp Alarm", &Font24, 0x000f, 0xfff0);
+      textpos+=30;
+      Paint_DrawString_EN(1, textpos, "Fan Failed", &Font24, 0x000f, 0xfff0);
+      LCD_1IN14_Display(BlackImage);
     }
       
     // Process keyboard entry, if any
@@ -251,6 +282,7 @@ int main() {
 	gpio_put(CONTROL_PIN, 0);
       }
     else if (input == POWERUP) {
+      temp_alarm_set = 0;
       printf("Turning on pin %d\n",CONTROL_PIN);
       gpio_put(CONTROL_PIN, 1);
     }
@@ -263,12 +295,16 @@ int main() {
     else if (input == GETDATA)
       {
 	char* names[]={"I5.0","I2.5","V5.0","V2.5"};
-	printf("I5.0=%.2f\n",i5);
-	printf("I2.5=%.2f\n",i25);
-	printf("V5.0=%.2f\n",v5);
-	printf("V2.5=%.2f\n",v25);
-	printf("Temp2.5=%.2f\n",t25);
-	printf("Temp=%.2f\n",temp);			
+
+     
+
+	
+	printf("I5.0=%.2f\n",i5l);
+	printf("I2.5=%.2f\n",i25l);
+	printf("V5.0=%.2f\n",v5l);
+	printf("V2.5=%.2f\n",v25l);
+	printf("Temp2.5=%.2f\n",t25l);
+	printf("Temp=%.2f\n",templ);			
 
 
       }

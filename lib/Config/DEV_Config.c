@@ -202,11 +202,12 @@ UBYTE DEV_Module_Init(void)
     
     
     //I2C Config
-    i2c_init(i2c1,300*1000);
-    gpio_set_function(EPD_SDA_PIN,GPIO_FUNC_I2C);
-    gpio_set_function(EPD_SCL_PIN,GPIO_FUNC_I2C);
-    gpio_pull_up(EPD_SDA_PIN);
-    gpio_pull_up(EPD_SCL_PIN);
+    //as far as I can tell this is only needed for that ICM thing. FIXME
+    /* i2c_init(i2c1,300*1000); */
+    /* gpio_set_function(EPD_SDA_PIN,GPIO_FUNC_I2C); */
+    /* gpio_set_function(EPD_SCL_PIN,GPIO_FUNC_I2C); */
+    /* gpio_pull_up(EPD_SDA_PIN); */
+    /* gpio_pull_up(EPD_SCL_PIN); */
     
     printf("DEV_Module_Init OK \r\n");
     return 0;
