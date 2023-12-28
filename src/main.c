@@ -4,9 +4,9 @@
  * Author: Vadim Rusu
  * Description: 
  * Created: Wed Dec 27 14:04:26 2023 (-0600)
- * Last-Updated: Wed Dec 27 14:47:31 2023 (-0600)
+ * Last-Updated: Thu Dec 28 09:57:42 2023 (-0600)
  *           By: Vadim Rusu
- *     Update #: 4
+ *     Update #: 8
  */
 
 /* Change Log:
@@ -45,9 +45,13 @@
 #define KEY_A 15
 #define KEY_B 17
 
+//#define OLDSTYLE
 
-
+#ifdef OLDSTYLE
+#define CONTROL_PIN 12
+#else
 #define CONTROL_PIN 21
+#endif
 
 // ADC Reference Voltage
 #define PICO_ADC_VREF 3.3f
@@ -103,33 +107,33 @@ float get_i25(){
 }
 
 float get_temp25(){
-  	adc_select_input(0);
-	adc_read();
-	uint16_t raw = adc_read();
-	float voltage = (raw * PICO_ADC_VREF) / PICO_ADC_RESOLUTION;
-	float temp = (1.8455 - voltage)/0.01123;
-	return temp;
+  adc_select_input(0);
+  adc_read();
+  uint16_t raw = adc_read();
+  float voltage = (raw * PICO_ADC_VREF) / PICO_ADC_RESOLUTION;
+  float temp = (1.8455 - voltage)/0.01123;
+  return temp;
 }
 float get_temp(){
-  	adc_select_input(2);
-	adc_read();
-	uint16_t raw = adc_read();
-	float voltage = (raw * PICO_ADC_VREF) / PICO_ADC_RESOLUTION;
-	float temp = (1.8455 - voltage)/0.01123;
-	return temp;
+  adc_select_input(2);
+  adc_read();
+  uint16_t raw = adc_read();
+  float voltage = (raw * PICO_ADC_VREF) / PICO_ADC_RESOLUTION;
+  float temp = (1.8455 - voltage)/0.01123;
+  return temp;
 }
 
 // This function will be called when GPIO 5 goes high
 void gpio_callback(uint gpio, uint32_t events)
 {
-    if (gpio == KEY_A)
+  if (gpio == KEY_A)
     {
-        // Your custom logic here
+      // Your custom logic here
       voltagesetup=1;
 
     }
 
-    else if (gpio == KEY_B)
+  else if (gpio == KEY_B)
     {
       voltagesetup=0;
 
@@ -157,41 +161,41 @@ int main() {
   adc124s051_init(&adc, spi0, GPIO_SCK, GPIO_MOSI, GPIO_MISO, GPIO_CS); // Initialize with SPI and GPIO settings
 
 
-DEV_Delay_ms(100);
-    printf("LCD_1in14_test Demo\r\n");
-    if (DEV_Module_Init() != 0)
+  DEV_Delay_ms(100);
+  printf("LCD_1in14_test Demo\r\n");
+  if (DEV_Module_Init() != 0)
     {
-        return -1;
+      return -1;
     }
 
-    DEV_SET_PWM(50);
-    /* LCD Init */
-    printf("1.14inch LCD demo...\r\n");
-    LCD_1IN14_Init(HORIZONTAL);
-    LCD_1IN14_Clear(WHITE);
+  DEV_SET_PWM(50);
+  /* LCD Init */
+  printf("1.14inch LCD demo...\r\n");
+  LCD_1IN14_Init(HORIZONTAL);
+  LCD_1IN14_Clear(WHITE);
 
-    // LCD_SetBacklight(1023);
-    UDOUBLE Imagesize = (LCD_1IN14_HEIGHT)*LCD_1IN14_WIDTH * 2;
+  // LCD_SetBacklight(1023);
+  UDOUBLE Imagesize = (LCD_1IN14_HEIGHT)*LCD_1IN14_WIDTH * 2;
 
-    if ((BlackImage = (UWORD *)malloc(Imagesize)) == NULL)
+  if ((BlackImage = (UWORD *)malloc(Imagesize)) == NULL)
     {
-        printf("Failed to apply for black memory...\r\n");
-        exit(0);
+      printf("Failed to apply for black memory...\r\n");
+      exit(0);
     }
-    // /*1.Create a new image cache named IMAGE_RGB and fill it with white*/
-    Paint_NewImage((UBYTE *)BlackImage, LCD_1IN14.WIDTH, LCD_1IN14.HEIGHT, 0, RED);
-    Paint_SetScale(65);
-    Paint_Clear(WHITE);
+  // /*1.Create a new image cache named IMAGE_RGB and fill it with white*/
+  Paint_NewImage((UBYTE *)BlackImage, LCD_1IN14.WIDTH, LCD_1IN14.HEIGHT, 0, RED);
+  Paint_SetScale(65);
+  Paint_Clear(WHITE);
 
-    Paint_SetRotate(ROTATE_0);
-    Paint_Clear(WHITE);
+  Paint_SetRotate(ROTATE_0);
+  Paint_Clear(WHITE);
 
-    SET_Infrared_PIN(KEY_A);
-    SET_Infrared_PIN(KEY_B);
+  SET_Infrared_PIN(KEY_A);
+  SET_Infrared_PIN(KEY_B);
 
 
-    float v5,v25,i5,i25,t25,temp;
-    int temp_alarm;
+  float v5,v25,i5,i25,t25,temp;
+  int temp_alarm;
   
   while (1) {
 
@@ -233,6 +237,7 @@ DEV_Delay_ms(100);
     }
 
     else{
+      gpio_put(CONTROL_PIN, 0); //turn power off
       Paint_ClearWindows(1, TOPCOLORWINDOW, LCD_1IN14.WIDTH, LCD_1IN14.HEIGHT, RED);
       Paint_DrawString_EN(1, textpos, "Temp Alarm, Fan fail", &Font20, 0x000f, 0xfff0);
     }
@@ -266,13 +271,6 @@ DEV_Delay_ms(100);
 
 
       }
-
-
-
-    
-      
-      
-      
   }
 }
 
