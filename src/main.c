@@ -4,9 +4,9 @@
  * Author: Vadim Rusu
  * Description: 
  * Created: Wed Dec 27 14:04:26 2023 (-0600)
- * Last-Updated: Thu Dec 28 12:19:35 2023 (-0600)
+ * Last-Updated: Fri Dec 29 08:47:20 2023 (-0600)
  *           By: Vadim Rusu
- *     Update #: 37
+ *     Update #: 46
  */
 
 /* Change Log:
@@ -65,7 +65,7 @@
 #define POWEROFF 'O'
 #define GETDATA 'A'
 
-#define DEVICEID 0xB0
+#define DEVICEID 0xB1
 
 #define MAXTEMP 45
 
@@ -154,7 +154,7 @@ int main() {
   // Initialize the control pin as output and set it to low
   gpio_init(CONTROL_PIN);
   gpio_set_dir(CONTROL_PIN, GPIO_OUT);
-  gpio_put(CONTROL_PIN, 1);
+  gpio_put(CONTROL_PIN, 0);
 
   voltagesetup=1;
 
@@ -233,7 +233,11 @@ int main() {
     int textpos = STARTTEXTPOS;
 
     temp_alarm = (templ>MAXTEMP || t25l>MAXTEMP)?1:0;
-				       
+
+#ifdef OLDSTYLE
+    temp_alarm = 0;
+#endif
+    
     
     if (temp_alarm == 0 && temp_alarm_set == 0){
       if (voltagesetup){
@@ -289,7 +293,7 @@ int main() {
 
     else if (input == GETDEVICEID)
       {
-	printf("%.2f\n", DEVICEID);
+	printf("%.2x\n", DEVICEID);
       }
 
     else if (input == GETDATA)
