@@ -4,9 +4,9 @@
  * Author: Vadim Rusu
  * Description: 
  * Created: Wed Dec 27 14:04:26 2023 (-0600)
- * Last-Updated: Fri Dec 29 08:47:20 2023 (-0600)
+ * Last-Updated: Fri Dec 29 19:57:57 2023 (-0600)
  *           By: Vadim Rusu
- *     Update #: 46
+ *     Update #: 54
  */
 
 /* Change Log:
@@ -64,8 +64,9 @@
 #define POWERUP 'U'
 #define POWEROFF 'O'
 #define GETDATA 'A'
+#define GETSTATUS 'S'
 
-#define DEVICEID 0xB1
+#define DEVICEID 0xB2
 
 #define MAXTEMP 45
 
@@ -81,7 +82,7 @@ int voltagesetup;
 
 // Function to apply low pass filter
 float lowPassFilter(float input, float previousOutput, float alpha) {
-    return alpha * input + (1 - alpha) * previousOutput;
+  return alpha * input + (1 - alpha) * previousOutput;
 }
 
 float get_v5(){
@@ -155,6 +156,7 @@ int main() {
   gpio_init(CONTROL_PIN);
   gpio_set_dir(CONTROL_PIN, GPIO_OUT);
   gpio_put(CONTROL_PIN, 0);
+  uint16_t soft_power_status = 0;
 
   voltagesetup=1;
 
@@ -282,12 +284,14 @@ int main() {
     int input = getchar_timeout_us(10);
     if (input == POWEROFF)
       {
-	printf("Turning off\n");
+	//	printf("Turning off\n");
+	soft_power_status = 0;
 	gpio_put(CONTROL_PIN, 0);
       }
     else if (input == POWERUP) {
       temp_alarm_set = 0;
-      printf("Turning on pin %d\n",CONTROL_PIN);
+      soft_power_status = 1;
+      //      printf("Turning on pin %d\n",CONTROL_PIN);
       gpio_put(CONTROL_PIN, 1);
     }
 
@@ -296,6 +300,18 @@ int main() {
 	printf("%.2x\n", DEVICEID);
       }
 
+    else if (input == GETSTATUS){
+
+#ifdef OLDSTYLE
+      printf("%d\n",soft_power_status);
+#else
+      uint16_t status = v5l>4.0?1:0;
+      printf("%d\n",status);
+#endif
+    }
+    
+
+    
     else if (input == GETDATA)
       {
 	char* names[]={"I5.0","I2.5","V5.0","V2.5"};
@@ -303,12 +319,12 @@ int main() {
      
 
 	
-	printf("I5.0=%.2f\n",i5l);
-	printf("I2.5=%.2f\n",i25l);
-	printf("V5.0=%.2f\n",v5l);
-	printf("V2.5=%.2f\n",v25l);
-	printf("Temp2.5=%.2f\n",t25l);
-	printf("Temp=%.2f\n",templ);			
+	printf("I5.0=%.2fA\n",i5l);
+	printf("I2.5=%.2fA\n",i25l);
+	printf("V5.0=%.2fV\n",v5l);
+	printf("V2.5=%.2fV\n",v25l);
+	printf("Temp2.5=%.2fC\n",t25l);
+	printf("Temp=%.2fC\n",templ);			
 
 
       }

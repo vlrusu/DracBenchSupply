@@ -11,7 +11,11 @@ import serial.tools.list_ports
 #         ser.write(tosend.encode())
 #         ser.close()
 
-
+def find_key_by_value(my_dict, search_value):
+    for key, value in my_dict.items():
+        if value == search_value:
+            return key
+    return None
 
 def list_usb_serial_devices(device_type):
     available_ports = serial.tools.list_ports.comports()
@@ -33,7 +37,7 @@ if __name__ == "__main__":
 
     # Add arguments
     parser.add_argument('-p','--port', type=str, help='The name of the serial port (e.g., COM3, /dev/ttyUSB0)',default="/dev/ttyACM0")
-    parser.add_argument('-a','--address', type=str, help='Device address',default="B2")
+    parser.add_argument('-t','--ts', type=str, help='Teststand number',default="-1")
     parser.add_argument('--on', action='store_true', help='The number to send to the serial port')
     parser.add_argument('--off', action='store_true', help='The number to send to the serial port')
     parser.add_argument('--list', action='store_true', help='List devices')
@@ -45,11 +49,17 @@ if __name__ == "__main__":
     device_type = "Pico - Board CDC"  # Modify this to match the device type you're looking for
 
 
+    tsmap={
+        "0": "b0",
+        "1": "b1",
+        "2": "b2"
+        }
+
     # Get a list of all available serial ports
     usb_serial_devices = list_usb_serial_devices(device_type)
     sers = []
     if usb_serial_devices:
-        print("USB Serial Devices:")
+#        print("USB Serial Devices:")
         for device, serial_number in usb_serial_devices:
 #            print(f"Device: {device}, Serial Number: {serial_number}")
             try:
@@ -60,31 +70,44 @@ if __name__ == "__main__":
 
 
     else:
-        print("No USB Serial Devices found.")
+        print("ERROR: No USB Serial Devices found.")
         exit()
 
     mapdata=dict()
     for ser in sers:
 
         ser.write(b'D')
-    
         ret = ser.readline().decode('ascii').strip()
         idevice = ret
-        mapdata[idevice] = ser.port
+        ser.write(b'S')
+        ret = ser.readline().decode('ascii').strip()
+        istatus = ret
+        
+        mapdata[idevice] = (ser.port,istatus)
         
         ser.close()
 
-    if args.list:
-        print(mapdata)
+    if args.list: 
+        for device,data in mapdata.items():
+            ts = find_key_by_value(tsmap,device)
+            status = {"0": "off", "1": "on"}
+            print(f' TS {ts} : DeviceID {device} : Port {data[0]} : Power {status[data[1]]} ')
+#        print(mapdata)
         exit()
 
-    deviceid = args.address
-    if deviceid in mapdata:
-        print(f'deviceid={deviceid} port={mapdata[deviceid]}')
+    if args.ts in tsmap:
+        deviceid = tsmap[args.ts]
     else:
-        print(f'deviceid={deviceid} not found')
+        print(f'ERROR: TS {args.ts} does not exist')
+    
+        
+#    deviceid = args.address
+    if deviceid in mapdata:
+        print(f'deviceid={deviceid} port={mapdata[deviceid][0]}')
+    else:
+        print(f'ERROR: deviceid={deviceid} not found')
         exit()
-    ser = serial.Serial(mapdata[deviceid],115200,exclusive=True)
+    ser = serial.Serial(mapdata[deviceid][0],115200,exclusive=True)
 
 
         
