@@ -38,10 +38,9 @@ if __name__ == "__main__":
     # Add arguments
     parser.add_argument('-p','--port', type=str, help='The name of the serial port (e.g., COM3, /dev/ttyUSB0)',default="/dev/ttyACM0")
     parser.add_argument('-t','--ts', type=str, help='Teststand number',default="-1")
-    parser.add_argument('--on', action='store_true', help='The number to send to the serial port')
-    parser.add_argument('--off', action='store_true', help='The number to send to the serial port')
+    parser.add_argument('state', choices=['on', 'off', 'data'], help='Set power state to on or off or data to get data')
+
     parser.add_argument('--list', action='store_true', help='List devices')
-    parser.add_argument('-d','--getdata', action='store_true', help='List data')
     
     # Parse the arguments
     args = parser.parse_args()
@@ -112,12 +111,12 @@ if __name__ == "__main__":
 
         
     # Send the number to the serial port
-    if (args.on):
+    if (args.state == 'on'):
         ser.write(b'U')
-    if (args.off):
+    elif (args.state == 'off'):
         ser.write(b'O')
 
-    if args.getdata:
+    elif (args.state == 'data'):
         ser.write(b'A')
         for i in range(6):
             print(ser.readline().strip().decode())

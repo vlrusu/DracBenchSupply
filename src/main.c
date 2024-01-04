@@ -4,9 +4,9 @@
  * Author: Vadim Rusu
  * Description: 
  * Created: Wed Dec 27 14:04:26 2023 (-0600)
- * Last-Updated: Fri Dec 29 19:57:57 2023 (-0600)
+ * Last-Updated: Wed Jan  3 12:21:20 2024 (-0600)
  *           By: Vadim Rusu
- *     Update #: 54
+ *     Update #: 55
  */
 
 /* Change Log:
@@ -47,7 +47,7 @@
 
 //#define OLDSTYLE
 
-#ifdef OLDSTYLE
+//#ifdef OLDSTYLE
 #define CONTROL_PIN 12
 #else
 #define CONTROL_PIN 21
