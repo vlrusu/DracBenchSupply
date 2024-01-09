@@ -38,7 +38,7 @@ if __name__ == "__main__":
     # Add arguments
     parser.add_argument('-p','--port', type=str, help='The name of the serial port (e.g., COM3, /dev/ttyUSB0)',default="/dev/ttyACM0")
     parser.add_argument('-t','--ts', type=str, help='Teststand number',default="-1")
-    parser.add_argument('state', choices=['on', 'off', 'data'], help='Set power state to on or off or data to get data')
+    parser.add_argument('state', choices=['on', 'off', 'data'], help='Set power state to on or off or data to get data',default='data',nargs="?")
 
     parser.add_argument('--list', action='store_true', help='List devices')
     
