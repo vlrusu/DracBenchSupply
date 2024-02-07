@@ -47,7 +47,7 @@
 
 //#define OLDSTYLE
 
-//#ifdef OLDSTYLE
+#ifdef OLDSTYLE
 #define CONTROL_PIN 12
 #else
 #define CONTROL_PIN 21
@@ -66,7 +66,7 @@
 #define GETDATA 'A'
 #define GETSTATUS 'S'
 
-#define DEVICEID 0xB2
+#define DEVICEID 0xB0
 
 #define MAXTEMP 45
 
@@ -284,14 +284,14 @@ int main() {
     int input = getchar_timeout_us(10);
     if (input == POWEROFF)
       {
-	//	printf("Turning off\n");
+	printf("Turning off\n");
 	soft_power_status = 0;
 	gpio_put(CONTROL_PIN, 0);
       }
     else if (input == POWERUP) {
       temp_alarm_set = 0;
       soft_power_status = 1;
-      //      printf("Turning on pin %d\n",CONTROL_PIN);
+      printf("Turning on pin %d\n",CONTROL_PIN);
       gpio_put(CONTROL_PIN, 1);
     }
 

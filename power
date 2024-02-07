@@ -113,8 +113,10 @@ if __name__ == "__main__":
     # Send the number to the serial port
     if (args.state == 'on'):
         ser.write(b'U')
+        ret = ser.readline()
     elif (args.state == 'off'):
         ser.write(b'O')
+        ret = ser.readline()        
 
     elif (args.state == 'data'):
         ser.write(b'A')
