@@ -39,7 +39,7 @@
 #ifndef __FONTS_H
 #define __FONTS_H
 
-/*最大字体微软雅黑24 (32x41) */
+/*脳卯麓贸脳脰脤氓脦垄脠铆脩脜潞脷24 (32x41) */
 #define MAX_HEIGHT_FONT         41
 #define MAX_WIDTH_FONT          32
 #define OFFSET_BITMAP           
@@ -62,10 +62,10 @@ typedef struct _tFont
 
 
 //GB2312
-typedef struct                                          // 汉字字模数据结构
+typedef struct                                          // 潞潞脳脰脳脰脛拢脢媒戮脻陆谩鹿鹿
 {
-  const  char index[2];                               // 汉字内码索引
-  const  char matrix[MAX_HEIGHT_FONT*MAX_WIDTH_FONT/8+2];  // 点阵码数据
+  const  char index[2];                               // 潞潞脳脰脛脷脗毛脣梅脪媒
+  const  char matrix[MAX_HEIGHT_FONT*MAX_WIDTH_FONT/8+2];  // 碌茫脮贸脗毛脢媒戮脻
 }CH_CN;
 
 
@@ -84,6 +84,7 @@ extern sFONT Font20;
 extern sFONT Font16;
 extern sFONT Font12;
 extern sFONT Font8;
+   extern sFONT FontFreeSans32;
 
 extern cFONT Font12CN;
 extern cFONT Font24CN;

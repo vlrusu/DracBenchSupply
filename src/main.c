@@ -66,13 +66,13 @@
 #define GETDATA 'A'
 #define GETSTATUS 'S'
 
-#define DEVICEID 0xB0
+#define DEVICEID 0xB4
 
 #define MAXTEMP 45
 
 UWORD *BlackImage;
 #define TOPCOLORWINDOW 0
-#define STARTTEXTPOS 40
+#define STARTTEXTPOS 10
 
 // Create an instance of ADC124S051 struct
 ADC124S051 adc;
@@ -155,7 +155,7 @@ int main() {
   // Initialize the control pin as output and set it to low
   gpio_init(CONTROL_PIN);
   gpio_set_dir(CONTROL_PIN, GPIO_OUT);
-  gpio_put(CONTROL_PIN, 0);
+  gpio_put(CONTROL_PIN, 1);
   uint16_t soft_power_status = 0;
 
   voltagesetup=1;
@@ -233,6 +233,7 @@ int main() {
 
 
     int textpos = STARTTEXTPOS;
+    int textincr = 35;
 
     temp_alarm = (templ>MAXTEMP || t25l>MAXTEMP)?1:0;
 
@@ -249,13 +250,13 @@ int main() {
 	sprintf(v5string, "%.2fV %.2fA", v5l,i5l);
 	sprintf(v25string, "%.2fV %.2fA", v25l,i25l);
 	Paint_ClearWindows(1, TOPCOLORWINDOW, LCD_1IN14.WIDTH, LCD_1IN14.HEIGHT, GREEN);
-	Paint_DrawString_EN(1, textpos, v5string, &Font24, 0x000f, 0xfff0);
-	textpos+=30;
-	Paint_DrawString_EN(1, textpos, v25string, &Font24, 0x000f, 0xfff0);
+	Paint_DrawString_EN(1, textpos, v5string, &FontFreeSans32, 0x000f, 0xfff0);
+	textpos+=textincr;
+	Paint_DrawString_EN(1, textpos, v25string, &FontFreeSans32, 0x000f, 0xfff0);
 	char tstring[20];
-	textpos+=30;
+	textpos+=textincr;
 	sprintf(tstring, "%.1fC Tb=%.1fC", t25l,templ);
-	Paint_DrawString_EN(1, textpos, tstring, &Font24, 0x000f, 0xfff0);
+	Paint_DrawString_EN(1, textpos, tstring, &FontFreeSans32, 0x000f, 0xfff0);
 
 
 	LCD_1IN14_Display(BlackImage);
@@ -265,7 +266,7 @@ int main() {
 	char tstring[20];
 	sprintf(tstring, "%.2fC %.2fC", t25,temp);
 	Paint_ClearWindows(1, TOPCOLORWINDOW, LCD_1IN14.WIDTH, LCD_1IN14.HEIGHT, GREEN);
-	Paint_DrawString_EN(1, textpos, tstring, &Font24, 0x000f, 0xfff0);
+	Paint_DrawString_EN(1, textpos, tstring, &FontFreeSans32, 0x000f, 0xfff0);
 	LCD_1IN14_Display(BlackImage);
       }
     }
@@ -274,9 +275,9 @@ int main() {
       temp_alarm_set = 1;
       gpio_put(CONTROL_PIN, 0); //turn power off
       Paint_ClearWindows(1, TOPCOLORWINDOW, LCD_1IN14.WIDTH, LCD_1IN14.HEIGHT, RED);
-      Paint_DrawString_EN(1, textpos, "Temp Alarm", &Font24, 0x000f, 0xfff0);
-      textpos+=30;
-      Paint_DrawString_EN(1, textpos, "Fan Failed", &Font24, 0x000f, 0xfff0);
+      Paint_DrawString_EN(1, textpos, "Temp Alarm", &FontFreeSans32, 0x000f, 0xfff0);
+      textpos+=textincr;
+      Paint_DrawString_EN(1, textpos, "Fan Failed", &FontFreeSans32, 0x000f, 0xfff0);
       LCD_1IN14_Display(BlackImage);
     }
       
